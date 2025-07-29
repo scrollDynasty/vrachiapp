@@ -1,0 +1,330 @@
+@import '../../styles/variables';
+
+.services {
+  padding: $spacing-4xl 0;
+  background: $white;
+
+  .dark-theme & {
+    background: $dark-bg;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-3xl;
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    font-weight: 800;
+    color: $dark-blue;
+    margin-bottom: $spacing-lg;
+    letter-spacing: -0.02em;
+
+    .dark-theme & {
+      color: $dark-text;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-xl;
+    color: $text-light;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+
+    .dark-theme & {
+      color: $dark-text-secondary;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-2xl;
+    margin-bottom: $spacing-3xl; // Добавляем отступ снизу
+  }
+
+  // Мобильная карусель
+  &__carousel {
+    display: none; // Скрываем на десктопе
+  }
+}
+
+.service-card {
+  background: $white;
+  border-radius: $border-radius-xl;
+  padding: $spacing-2xl;
+  box-shadow: $shadow-light;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba($primary-blue, 0.05);
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: $shadow-large;
+    border-color: rgba($primary-blue, 0.1);
+  }
+
+  .dark-theme & {
+    background: $dark-card;
+    box-shadow: $shadow-dark-light;
+    border-color: $dark-border;
+
+    &:hover {
+      box-shadow: $shadow-dark-large;
+      border-color: $dark-hover;
+    }
+  }
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    background: $light-blue;
+    border-radius: $border-radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-lg;
+    transition: all 0.3s ease;
+
+    .dark-theme & {
+      background: $dark-hover;
+    }
+
+    svg {
+      width: 40px;
+      height: 40px;
+      color: $primary-blue;
+      transition: all 0.3s ease;
+
+      .dark-theme & {
+        color: $dark-text;
+      }
+    }
+  }
+
+  &:hover &__icon {
+    background: $primary-blue;
+    transform: scale(1.1);
+
+    svg {
+      color: $white;
+    }
+
+    .dark-theme & {
+      background: $primary-blue;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: $spacing-md;
+    line-height: 1.3;
+
+    .dark-theme & {
+      color: $dark-text;
+    }
+  }
+
+  &__description {
+    font-size: $font-size-md;
+    color: $text-light;
+    line-height: 1.6;
+    margin-bottom: $spacing-xl;
+
+    .dark-theme & {
+      color: $dark-text-secondary;
+    }
+  }
+
+  &__btn {
+    background: transparent;
+    color: $primary-blue;
+    border: 2px solid $primary-blue;
+    padding: $spacing-md $spacing-xl;
+    border-radius: $border-radius-lg;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    &:hover {
+      background: $primary-blue;
+      color: $white;
+      transform: translateY(-2px);
+      box-shadow: $shadow-medium;
+    }
+
+    .dark-theme & {
+      color: $dark-text;
+      border-color: $dark-border;
+
+      &:hover {
+        background: $dark-hover;
+        color: $dark-text;
+        border-color: $dark-hover;
+        box-shadow: $shadow-dark-medium;
+      }
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover svg {
+      transform: translateX(4px);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .services {
+    padding: $spacing-2xl 0;
+
+    &__header {
+      margin-bottom: $spacing-2xl;
+    }
+
+    &__title {
+      font-size: $font-size-2xl;
+    }
+
+    &__subtitle {
+      font-size: $font-size-lg;
+    }
+
+    &__grid {
+      display: none; // Скрываем обычную сетку на мобильных
+    }
+
+    // Показываем карусель на мобильных
+    &__carousel {
+      display: block;
+      margin-bottom: $spacing-2xl;
+    }
+
+    &__carousel-container {
+      overflow-x: auto; // Горизонтальный скролл
+      overflow-y: hidden;
+      margin-bottom: $spacing-lg;
+      touch-action: pan-x; // Разрешаем горизонтальный свайп
+      user-select: none; // Запрещаем выделение текста при свайпе
+      
+      // Скрываем скроллбар
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    &__carousel-track {
+      display: flex;
+      transition: transform 0.3s ease;
+      will-change: transform; // Оптимизация производительности
+    }
+
+    &__carousel-slide {
+      display: flex;
+      gap: $spacing-lg;
+      min-width: max-content; // Позволяет контенту расширяться
+      flex-shrink: 0;
+
+      .service-card {
+        flex: 0 0 280px; // Фиксированная ширина карточки
+        max-width: 280px;
+        min-width: 280px;
+      }
+    }
+  }
+
+  .service-card {
+    min-width: 280px;
+    padding: $spacing-lg;
+    height: auto;
+
+    &__icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: $spacing-md;
+
+      svg {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-md;
+    }
+
+    &__description {
+      font-size: $font-size-sm;
+    }
+
+    &__btn {
+      padding: $spacing-sm $spacing-md;
+      font-size: $font-size-xs;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .services {
+    padding: $spacing-xl 0;
+
+    &__header {
+      margin-bottom: $spacing-xl;
+    }
+
+    &__title {
+      font-size: $font-size-xl;
+    }
+
+    &__subtitle {
+      font-size: $font-size-sm;
+    }
+
+    &__carousel-slide {
+      gap: $spacing-md;
+    }
+  }
+
+  .service-card {
+    min-width: 250px;
+    padding: $spacing-md;
+
+    &__icon {
+      width: 50px;
+      height: 50px;
+      margin-bottom: $spacing-sm;
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    &__title {
+      font-size: $font-size-sm;
+    }
+
+    &__description {
+      font-size: $font-size-xs;
+    }
+
+    &__btn {
+      padding: $spacing-xs $spacing-sm;
+      font-size: 10px;
+    }
+  }
+} 

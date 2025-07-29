@@ -1,0 +1,138 @@
+@import '../../styles/variables';
+
+.mobile-nav {
+  display: none; // Скрываем по умолчанию на десктопе
+  
+  @media (max-width: 768px) {
+    display: block; // Показываем только на мобильных
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(229, 232, 238, 1) 100%);
+    padding: 0 $spacing-md $spacing-md;
+
+    .dark-theme & {
+      background: linear-gradient(180deg, rgba(15, 20, 25, 0) 0%, rgba(26, 31, 46, 1) 100%);
+    }
+  }
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    background: $white;
+    border-radius: 45px;
+    padding: $spacing-sm;
+    box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.1);
+    gap: $spacing-sm;
+
+    .dark-theme & {
+      background: $dark-card;
+      box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: 0 $spacing-sm;
+    border-radius: 28px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    flex: 1;
+    min-height: 60px;
+
+    &:hover {
+      background: rgba($primary-blue, 0.05);
+
+      .dark-theme & {
+        background: rgba($dark-text, 0.05);
+      }
+    }
+
+    &--active {
+      background: $primary-blue;
+      color: $white;
+
+      .dark-theme & {
+        background: $primary-blue;
+        color: $white;
+      }
+
+      .mobile-nav__icon {
+        color: $white;
+      }
+
+      .mobile-nav__text {
+        color: $white;
+        font-weight: 500;
+      }
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: $text-light;
+    transition: color 0.3s ease;
+
+    .dark-theme & {
+      color: $dark-text-secondary;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    font-weight: 400;
+    color: $text-light;
+    line-height: 1.37;
+    transition: color 0.3s ease;
+
+    .dark-theme & {
+      color: $dark-text-secondary;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-nav {
+    padding: 0 $spacing-sm $spacing-sm;
+
+    &__container {
+      padding: $spacing-xs;
+      gap: $spacing-xs;
+    }
+
+    &__item {
+      padding: 0 $spacing-xs;
+      min-height: 50px;
+    }
+
+    &__icon {
+      width: 20px;
+      height: 20px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &__text {
+      font-size: 12px;
+    }
+  }
+} 
