@@ -20,6 +20,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [detecting, setDetecting] = useState(false);
   const [message, setMessage] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Загружаем данные профиля
   useEffect(() => {
@@ -51,9 +52,15 @@ const Profile = () => {
           loadCities(data.region.id);
           loadDistricts(data.region.id);
         }
+        
+        setIsAuthenticated(true);
+      } else if (response.status === 401 || response.status === 403) {
+        // Пользователь не аутентифицирован
+        setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Ошибка загрузки профиля:', error);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
@@ -161,22 +168,18 @@ const Profile = () => {
         setProfile(prev => ({
           ...prev,
           region: data.region.id,
-          city: data.city?.id || null,
-          district: data.district?.id || null,
-          address: data.address_suggestion || ''
+          city: null, // Оставляем пустым для ручного ввода
+          district: null, // Оставляем пустым для ручного ввода
+          address: '' // Оставляем пустым для ручного ввода
         }));
         
         // Загружаем города и районы для определенного региона
         loadCities(data.region.id);
         loadDistricts(data.region.id);
         
-        // Формируем сообщение в зависимости от типа региона
+        // Формируем сообщение
         let messageText = `✅ ${data.message}`;
-        if (data.region.type === 'city') {
-          messageText += ' - автоматически заполнены регион, район и адрес (город республиканского подчинения)';
-        } else {
-          messageText += ' - автоматически заполнены регион, город, район и адрес';
-        }
+        messageText += ' - автоматически определен регион. Пожалуйста, введите город, район и адрес вручную.';
         
         setMessage(messageText);
         setTimeout(() => setMessage(''), 5000);
@@ -204,6 +207,9 @@ const Profile = () => {
     setMessage('');
 
     try {
+      console.log('Отправляем данные профиля:', profile);
+      console.log('JSON данные:', JSON.stringify(profile, null, 2));
+      
       const response = await fetch('http://localhost:8000/api/auth/profile/', {
         method: 'PUT',
         headers: {
@@ -218,9 +224,11 @@ const Profile = () => {
         setTimeout(() => setMessage(''), 3000);
       } else {
         const error = await response.json();
-        setMessage('Ошибка: ' + (error.message || 'Не удалось обновить профиль'));
+        console.error('Ошибка сервера:', error);
+        setMessage('Ошибка: ' + (error.message || JSON.stringify(error)));
       }
     } catch (error) {
+      console.error('Ошибка соединения:', error);
       setMessage('Ошибка соединения с сервером');
     } finally {
       setSaving(false);
@@ -231,6 +239,31 @@ const Profile = () => {
     return (
       <div className="profile">
         <div className="profile__loading">Загрузка профиля...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="profile">
+        <div className="profile__container">
+          <div className="profile__auth-required">
+            <h2 className="profile__auth-title">Требуется вход в систему</h2>
+            <p className="profile__auth-message">
+              Для просмотра и редактирования профиля необходимо войти в систему.
+            </p>
+            <button 
+              className="profile__auth-btn"
+              onClick={() => {
+                // Здесь можно добавить логику для открытия модального окна входа
+                // или перенаправления на страницу входа
+                alert('Пожалуйста, войдите в систему через главное меню');
+              }}
+            >
+              Войти в систему
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -302,7 +335,7 @@ const Profile = () => {
                     <svg className="profile__detect-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M6.34 6.34l-2.83 2.83m8.48 8.48l2.83-2.83" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Определение...
+                    Определение региона...
                   </>
                 ) : (
                   <>
@@ -310,10 +343,13 @@ const Profile = () => {
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Определить мое местоположение
+                    Автоматически определить регион
                   </>
                 )}
               </button>
+              <p className="profile__detect-hint">
+                Кнопка автоматически определит ваш регион. Город, район и адрес нужно будет ввести вручную.
+              </p>
             </div>
             
             <div className="profile__row">

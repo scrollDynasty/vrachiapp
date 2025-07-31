@@ -3,7 +3,7 @@ import healzyLogo from '../../assets/images/healzy.svg';
 import AuthModal from '../AuthModal/AuthModal';
 import './Header.scss';
 
-const Header = () => {
+const Header = ({ onPageChange }) => {
   const [currentLanguage, setCurrentLanguage] = useState('RU');
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return !!localStorage.getItem('user');
@@ -13,6 +13,12 @@ const Header = () => {
     return user ? JSON.parse(user) : null;
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleLogoClick = () => {
+    if (onPageChange) {
+      onPageChange('home');
+    }
+  };
 
   const languages = [
     { code: 'RU', name: 'Русский' },
@@ -38,7 +44,7 @@ const Header = () => {
       <div className="container">
         <div className="header__content">
           <div className="header__logo">
-            <div className="header__logo-container">
+            <div className="header__logo-container" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
               <img src={healzyLogo} alt="Healzy" className="header__logo-img" />
             </div>
           </div>

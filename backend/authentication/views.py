@@ -11,7 +11,7 @@ from django.db import models
 from .models import User, UserProfile, Region, City, District
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer, 
-    GoogleAuthSerializer, PasswordResetSerializer, UserProfileSerializer,
+    GoogleAuthSerializer, PasswordResetSerializer, UserProfileSerializer, UserProfileReadSerializer,
     RegionSerializer, CitySerializer, DistrictSerializer
 )
 
@@ -45,12 +45,21 @@ class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
+        print(f"DEBUG: LoginView.post вызван")
+        print(f"DEBUG: Данные входа: {request.data}")
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         
+        print(f"DEBUG: Пользователь найден: {user}")
+        
         # Входим в систему
         login(request, user)
+        
+        print(f"DEBUG: Пользователь вошел в систему")
+        print(f"DEBUG: Сессия: {request.session.session_key}")
+        print(f"DEBUG: Пользователь в сессии: {request.session.get('_auth_user_id')}")
         
         return Response({
             'user': UserSerializer(user).data,
@@ -247,19 +256,7 @@ def get_districts(request):
 def detect_location(request):
     """Определение местоположения по координатам"""
     
-    # Создаем специальный сериализатор для временных районов
-    from rest_framework import serializers
-    from collections import namedtuple
     import requests
-    
-    class TempDistrictSerializer(serializers.Serializer):
-        id = serializers.IntegerField()
-        name = serializers.CharField()
-        name_uz = serializers.CharField()
-        region = serializers.SerializerMethodField()
-        
-        def get_region(self, obj):
-            return RegionSerializer(obj.region).data
     
     try:
         lat = float(request.data.get('latitude'))
@@ -484,90 +481,17 @@ def detect_location(request):
         region = Region.objects.filter(name=region_name).first()
         
         if region:
-            # Определяем город, район и адрес
-            city_obj = None
-            district_obj = None
+            # Определяем только регион, остальные поля пользователь заполнит вручную
+            print(f"DEBUG: Определен регион: {region.name}")
             
-            # Для городов республиканского подчинения
-            if region.type == 'city':
-                city_obj = None  # Город не нужен, так как регион уже является городом
-                
-                # Определяем район города по адресу или берем первый доступный
-                if region.name == "Город Ташкент":
-                    # Пытаемся определить район из адреса
-                    if "Чиланзар" in real_address:
-                        district_name = "Чиланзарский район"
-                    elif "Юнусабад" in real_address:
-                        district_name = "Юнусабадский район"
-                    elif "Мирабад" in real_address:
-                        district_name = "Мирабадский район"
-                    elif "Сергели" in real_address:
-                        district_name = "Сергелийский район"
-                    else:
-                        district_name = "Центральный район"
-                elif region.name == "Город Самарканд":
-                    district_name = "Сиабский район"
-                elif region.name == "Город Бухара":
-                    district_name = "Старый город"
-                else:
-                    district_name = "Центральный район"
-                
-                # Используем реальный адрес
-                address_suggestion = real_address
-                
-                # Ищем район в базе данных (создаем виртуальный район для городов)
-                district_obj = District.objects.filter(name=district_name, region=region).first()
-                
-                # Если район не найден, создаем его виртуально
-                if not district_obj:
-                    # Создаем временный объект района для отображения
-                    DistrictTemp = namedtuple('DistrictTemp', ['id', 'name', 'name_uz', 'region'])
-                    district_obj = DistrictTemp(id=999, name=district_name, name_uz=district_name, region=region)
-                
-                print(f"DEBUG: Район города: {district_name}")
-                
-            else:
-                # Для областей берем первый доступный город и район из базы данных
-                city_name = None
-                district_name = None
-                
-                # Используем реальный адрес
-                address_suggestion = real_address
-                
-                # Ищем город и район в базе данных
-                city_obj = City.objects.filter(name=city_name, region=region).first()
-                district_obj = District.objects.filter(name=district_name, region=region).first()
-                
-                # Если город не найден, берем первый доступный город в регионе
-                if not city_obj:
-                    city_obj = City.objects.filter(region=region).first()
-                
-                # Если район не найден, берем первый доступный район в регионе
-                if not district_obj:
-                    district_obj = District.objects.filter(region=region).first()
+            # Формируем сообщение
+            message = f'Определен регион: {region.name}'
             
-            print(f"DEBUG: Адрес: {address_suggestion}")
-            print(f"DEBUG: Город: {city_obj}")
-            print(f"DEBUG: Район: {district_obj}")
-            
-            # Формируем сообщение в зависимости от типа региона
-            if region.type == 'city':
-                message = f'Определено местоположение: {region.name} ({district_name})'
-            else:
-                message = f'Определено местоположение: {region.name}'
-            
-            # Выбираем правильный сериализатор для района
-            if hasattr(district_obj, '_meta'):  # Это модель Django
-                district_data = DistrictSerializer(district_obj).data
-            else:  # Это временный объект
-                district_data = TempDistrictSerializer(district_obj).data
+
             
             return Response({
                 'success': True,
                 'region': RegionSerializer(region).data,
-                'city': CitySerializer(city_obj).data if city_obj else None,
-                'district': district_data,
-                'address_suggestion': address_suggestion,
                 'message': message
             })
         else:
@@ -588,12 +512,24 @@ def detect_location(request):
 @permission_classes([IsAuthenticated])
 def user_profile(request):
     """Профиль пользователя"""
+    print(f"DEBUG: user_profile вызван, метод: {request.method}")
+    print(f"DEBUG: Пользователь аутентифицирован: {request.user.is_authenticated}")
+    print(f"DEBUG: Пользователь: {request.user}")
+    
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     
     if request.method == 'GET':
-        return Response(UserProfileSerializer(profile).data)
+        return Response(UserProfileReadSerializer(profile).data)
     
     elif request.method == 'PUT':
+        print(f"DEBUG: ===== НАЧАЛО ОБРАБОТКИ PUT ЗАПРОСА =====")
+        print(f"DEBUG: Получены данные профиля: {request.data}")
+        print(f"DEBUG: Тип данных: {type(request.data)}")
+        print(f"DEBUG: Ключи: {list(request.data.keys())}")
+        print(f"DEBUG: Content-Type: {request.content_type}")
+        print(f"DEBUG: Пользователь: {request.user}")
+        print(f"DEBUG: Аутентифицирован: {request.user.is_authenticated}")
+        
         # Обновляем данные пользователя
         user_data = {}
         if 'first_name' in request.data:
@@ -605,13 +541,36 @@ def user_profile(request):
             for field, value in user_data.items():
                 setattr(request.user, field, value)
             request.user.save()
+            print(f"DEBUG: Данные пользователя обновлены")
         
         # Обновляем данные профиля
         profile_data = {k: v for k, v in request.data.items() 
-                       if k not in ['first_name', 'last_name', 'email']}
+                       if k not in ['first_name', 'last_name', 'email', 'username']}
+        
+        # Преобразуем названия полей для сериализатора
+        if 'region' in profile_data:
+            profile_data['region_id'] = profile_data.pop('region')
+        if 'city' in profile_data:
+            profile_data['city_id'] = profile_data.pop('city')
+        if 'district' in profile_data:
+            profile_data['district_id'] = profile_data.pop('district')
+        
+        print(f"DEBUG: Обработанные данные профиля: {profile_data}")
         
         serializer = UserProfileSerializer(profile, data=profile_data, partial=True)
-        if serializer.is_valid():
+        print(f"DEBUG: Сериализатор создан")
+        print(f"DEBUG: Данные для сериализатора: {profile_data}")
+        
+        is_valid = serializer.is_valid()
+        print(f"DEBUG: Результат валидации: {is_valid}")
+        
+        if is_valid:
+            print(f"DEBUG: Данные валидны, сохраняем...")
             serializer.save()
-            return Response(UserProfileSerializer(profile).data)
-        return Response(serializer.errors, status=400) 
+            return Response(UserProfileReadSerializer(profile).data)
+        else:
+            print(f"DEBUG: ===== ОШИБКИ ВАЛИДАЦИИ =====")
+            print(f"DEBUG: Ошибки валидации: {serializer.errors}")
+            print(f"DEBUG: Полные ошибки: {serializer.errors}")
+            print(f"DEBUG: Тип ошибок: {type(serializer.errors)}")
+            return Response(serializer.errors, status=400) 

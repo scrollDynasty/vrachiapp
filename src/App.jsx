@@ -91,8 +91,8 @@ function App() {
 
   return (
     <div className="app">
-      <Header />
-      <Sidebar toggleTheme={toggleTheme} isDarkTheme={isDarkTheme} onPageChange={setCurrentPage} />
+      <Header onPageChange={setCurrentPage} />
+      <Sidebar toggleTheme={toggleTheme} isDarkTheme={isDarkTheme} onPageChange={setCurrentPage} currentPage={currentPage} />
       <main className="main">
         {renderContent()}
       </main>

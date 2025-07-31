@@ -108,6 +108,16 @@
     animation: spin 1s linear infinite;
   }
 
+  &__detect-hint {
+    margin-top: $spacing-md;
+    font-size: $font-size-sm;
+    color: $text-light;
+    line-height: 1.4;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -232,6 +242,49 @@
     color: $white;
     font-weight: 500;
   }
+
+  &__auth-required {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  &__auth-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: $white;
+    margin-bottom: 16px;
+  }
+
+  &__auth-message {
+    font-size: 16px;
+    color: rgba($white, 0.8);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  &__auth-btn {
+    background: $gradient-primary;
+    color: $white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: $border-radius-lg;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: $shadow-medium;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-large;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
 }
 
 // Темная тема
@@ -277,6 +330,14 @@
     
     &__actions {
       border-top-color: $dark-border;
+    }
+
+    &__auth-title {
+      color: $dark-text-primary;
+    }
+
+    &__auth-message {
+      color: $dark-text-secondary;
     }
   }
 }

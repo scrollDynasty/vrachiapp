@@ -9,11 +9,10 @@ urlpatterns = [
     path('google-auth/', views.GoogleAuthView.as_view(), name='google-auth'),
     
     # Профиль
-    path('profile/', views.UserProfileView.as_view(), name='profile'),
+    path('profile/', views.user_profile, name='user-profile'),
     path('check-auth/', views.check_auth, name='check-auth'),
     path('csrf/', views.get_csrf_token, name='csrf'),
     path('users/', views.list_users, name='list-users'),
-    path('profile/', views.user_profile, name='user-profile'),
     path('regions/', views.get_regions, name='regions'),
     path('cities/', views.get_cities, name='cities'),
     path('districts/', views.get_districts, name='districts'),
