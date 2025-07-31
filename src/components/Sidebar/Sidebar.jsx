@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import './Sidebar.scss';
 
-const Sidebar = ({ toggleTheme, isDarkTheme }) => {
+const Sidebar = ({ toggleTheme, isDarkTheme, onPageChange }) => {
   const [activeItem, setActiveItem] = useState('home');
+
+  const handleItemClick = (itemId) => {
+    setActiveItem(itemId);
+    onPageChange(itemId);
+  };
 
 
 
@@ -106,7 +111,7 @@ const Sidebar = ({ toggleTheme, isDarkTheme }) => {
             <li key={item.id} className="sidebar__nav-item">
               <button
                 className={`sidebar__nav-link ${activeItem === item.id ? 'sidebar__nav-link--active' : ''}`}
-                onClick={() => setActiveItem(item.id)}
+                onClick={() => handleItemClick(item.id)}
                 title={item.label}
               >
                 <div className="sidebar__nav-icon">

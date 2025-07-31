@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import healzyLogo from '../../assets/images/healzy.svg';
+import AuthModal from '../AuthModal/AuthModal';
 import './Header.scss';
 
 const Header = () => {
   const [currentLanguage, setCurrentLanguage] = useState('RU');
-  const [isLoggedIn] = useState(true); // Тестовые данные - пользователь авторизован
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem('user');
+  });
+  const [userData, setUserData] = useState(() => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  });
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const languages = [
     { code: 'RU', name: 'Русский' },
@@ -12,10 +20,17 @@ const Header = () => {
     { code: 'EN', name: 'Английский' }
   ];
 
-  const userData = {
-    name: 'Матёкубов Умар',
-    status: 'Пациент',
-    avatar: 'Y' // Первая буква имени для аватара
+  const handleAuthSuccess = (user) => {
+    setIsLoggedIn(true);
+    setUserData(user);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setIsLoggedIn(false);
+    setUserData(null);
   };
 
   return (
@@ -65,16 +80,35 @@ const Header = () => {
             </div>
 
             {/* Пользовательская секция */}
-            {isLoggedIn && (
+            {isLoggedIn && userData ? (
               <div className="header__user">
                 <div className="header__user-avatar">
-                  {userData.avatar}
+                  {userData.initials || userData.first_name?.[0] || 'U'}
                 </div>
                 <div className="header__user-info">
-                  <div className="header__user-name">{userData.name}</div>
-                  <div className="header__user-status">{userData.status}</div>
+                  <div className="header__user-name">{userData.full_name || userData.first_name || userData.username}</div>
+                  <div className="header__user-status">Пациент</div>
                 </div>
+                <button className="header__logout-btn" onClick={handleLogout} title="Выйти">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="16,17 21,12 16,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
+            ) : (
+              <button 
+                className="header__auth-btn"
+                onClick={() => setShowAuthModal(true)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="10,17 15,12 10,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Войти</span>
+              </button>
             )}
 
             {/* Кнопка поддержки */}
@@ -88,6 +122,12 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </header>
   );
 };

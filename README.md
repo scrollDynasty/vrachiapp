@@ -58,6 +58,13 @@
 - **SCSS** - препроцессор стилей
 - **CSS Grid & Flexbox** - современная верстка
 
+### Backend
+- **Django 4.2** - веб-фреймворк
+- **Django REST Framework** - API
+- **MariaDB/MySQL** - база данных
+- **JWT** - аутентификация
+- **Google OAuth** - социальная аутентификация
+
 ### Стилизация
 - **SCSS переменные** - централизованные цвета и размеры
 - **CSS Grid** - адаптивные сетки
@@ -108,6 +115,8 @@ src/
 
 ## 🚀 Установка и запуск
 
+### Frontend
+
 ```bash
 # Установка зависимостей
 npm install
@@ -118,6 +127,40 @@ npm run dev
 # Сборка для продакшена
 npm run build
 ```
+
+### Backend
+
+```bash
+# Переход в папку backend
+cd backend
+
+# Создание виртуального окружения
+python -m venv venv
+
+# Активация виртуального окружения
+# Windows: venv\Scripts\activate
+# Linux/Mac: source venv/bin/activate
+
+# Установка зависимостей
+pip install -r requirements.txt
+
+# Создание базы данных MariaDB/MySQL
+# CREATE DATABASE vrachiapp_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# Применение миграций
+python manage.py makemigrations
+python manage.py migrate
+
+# Создание суперпользователя
+python manage.py createsuperuser
+
+# Запуск сервера
+python manage.py runserver
+```
+
+**Frontend**: http://localhost:5173  
+**Backend API**: http://localhost:8000  
+**Django Admin**: http://localhost:8000/admin/
 
 ## 📱 Поддерживаемые устройства
 
@@ -158,12 +201,15 @@ $spacing-lg: 24px;
 
 ## 🎯 Планы развития
 
-- [ ] **Бэкенд API** - Django REST Framework
-- [ ] **Аутентификация** - система входа/регистрации
+- [x] **Бэкенд API** - Django REST Framework
+- [x] **Аутентификация** - система входа/регистрации
+- [x] **Google OAuth** - вход через Google аккаунт
 - [ ] **Запись к врачу** - онлайн бронирование
 - [ ] **Личный кабинет** - профиль пациента
 - [ ] **Онлайн консультации** - видео-звонки
 - [ ] **AI диагностика** - предварительная диагностика
+- [ ] **Уведомления** - email и SMS уведомления
+- [ ] **Платежи** - интеграция с платежными системами
 
 ## 📄 Лицензия
 

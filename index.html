@@ -5,6 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      // Инициализация Google Identity Services
+      window.onload = function() {
+        if (window.google) {
+          google.accounts.id.initialize({
+            client_id: '735617581412-e8ceb269bj7qqrv9sl066q63g5dr5sne.apps.googleusercontent.com',
+            callback: function(response) {
+              console.log('Google Identity Services loaded');
+            }
+          });
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
