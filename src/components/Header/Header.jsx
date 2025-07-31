@@ -3,15 +3,8 @@ import healzyLogo from '../../assets/images/healzy.svg';
 import AuthModal from '../AuthModal/AuthModal';
 import './Header.scss';
 
-const Header = ({ onPageChange }) => {
+const Header = ({ onPageChange, isAuthenticated, userData, onAuthSuccess, onLogout }) => {
   const [currentLanguage, setCurrentLanguage] = useState('RU');
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem('user');
-  });
-  const [userData, setUserData] = useState(() => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
-  });
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleLogoClick = () => {
@@ -27,16 +20,8 @@ const Header = ({ onPageChange }) => {
   ];
 
   const handleAuthSuccess = (user) => {
-    setIsLoggedIn(true);
-    setUserData(user);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    setIsLoggedIn(false);
-    setUserData(null);
+    onAuthSuccess(user);
+    setShowAuthModal(false);
   };
 
   return (
@@ -86,16 +71,18 @@ const Header = ({ onPageChange }) => {
             </div>
 
             {/* Пользовательская секция */}
-            {isLoggedIn && userData ? (
+            {isAuthenticated && userData ? (
               <div className="header__user">
                 <div className="header__user-avatar">
                   {userData.initials || userData.first_name?.[0] || 'U'}
                 </div>
                 <div className="header__user-info">
                   <div className="header__user-name">{userData.full_name || userData.first_name || userData.username}</div>
-                  <div className="header__user-status">Пациент</div>
+                  <div className="header__user-status">
+                    {userData.is_staff ? 'Администратор' : userData.is_doctor ? 'Врач' : 'Пациент'}
+                  </div>
                 </div>
-                <button className="header__logout-btn" onClick={handleLogout} title="Выйти">
+                <button className="header__logout-btn" onClick={onLogout} title="Выйти">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <polyline points="16,17 21,12 16,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
