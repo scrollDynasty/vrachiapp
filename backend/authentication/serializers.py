@@ -79,17 +79,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
     
     def validate(self, attrs):
-        print(f"DEBUG: ===== ВАЛИДАЦИЯ СЕРИАЛИЗАТОРА =====")
-        print(f"DEBUG: Валидация данных: {attrs}")
-        print(f"DEBUG: Тип attrs: {type(attrs)}")
-        print(f"DEBUG: Ключи attrs: {list(attrs.keys()) if attrs else 'None'}")
         return attrs
     
     def update(self, instance, validated_data):
-        print(f"DEBUG: Обновление профиля с данными: {validated_data}")
-        print(f"DEBUG: Тип validated_data: {type(validated_data)}")
-        print(f"DEBUG: Ключи validated_data: {list(validated_data.keys())}")
-        
         # Обрабатываем ID для связей
         region_id = validated_data.pop('region_id', None)
         city_id = validated_data.pop('city_id', None)
@@ -98,33 +90,26 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if region_id is not None:
             try:
                 instance.region = Region.objects.get(id=region_id)
-                print(f"DEBUG: Установлен регион ID {region_id}")
             except Region.DoesNotExist:
                 instance.region = None
-                print(f"DEBUG: Регион с ID {region_id} не найден")
         
         if city_id is not None:
             try:
                 instance.city = City.objects.get(id=city_id)
-                print(f"DEBUG: Установлен город ID {city_id}")
             except City.DoesNotExist:
                 instance.city = None
-                print(f"DEBUG: Город с ID {city_id} не найден")
         
         if district_id is not None:
             try:
                 instance.district = District.objects.get(id=district_id)
-                print(f"DEBUG: Установлен район ID {district_id}")
             except District.DoesNotExist:
                 instance.district = None
-                print(f"DEBUG: Район с ID {district_id} не найден")
         
         # Обновляем остальные поля
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
         instance.save()
-        print(f"DEBUG: Профиль сохранен")
         return instance
 
 

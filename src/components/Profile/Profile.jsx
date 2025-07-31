@@ -59,7 +59,6 @@ const Profile = () => {
         setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error('Ошибка загрузки профиля:', error);
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
@@ -74,7 +73,7 @@ const Profile = () => {
         setRegions(data);
       }
     } catch (error) {
-      console.error('Ошибка загрузки регионов:', error);
+      // Ошибка загрузки регионов
     }
   };
 
@@ -86,7 +85,7 @@ const Profile = () => {
         setCities(data);
       }
     } catch (error) {
-      console.error('Ошибка загрузки городов:', error);
+      // Ошибка загрузки городов
     }
   };
 
@@ -98,7 +97,7 @@ const Profile = () => {
         setDistricts(data);
       }
     } catch (error) {
-      console.error('Ошибка загрузки районов:', error);
+      // Ошибка загрузки районов
     }
   };
 
@@ -207,8 +206,7 @@ const Profile = () => {
     setMessage('');
 
     try {
-      console.log('Отправляем данные профиля:', profile);
-      console.log('JSON данные:', JSON.stringify(profile, null, 2));
+
       
       const response = await fetch('http://localhost:8000/api/auth/profile/', {
         method: 'PUT',
@@ -220,15 +218,15 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        setMessage('Профиль успешно обновлен!');
-        setTimeout(() => setMessage(''), 3000);
+        const result = await response.json();
+        setMessage(result.message || 'Профиль успешно обновлен!');
+        setTimeout(() => setMessage(''), 5000);
       } else {
         const error = await response.json();
-        console.error('Ошибка сервера:', error);
         setMessage('Ошибка: ' + (error.message || JSON.stringify(error)));
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (error) {
-      console.error('Ошибка соединения:', error);
       setMessage('Ошибка соединения с сервером');
     } finally {
       setSaving(false);
@@ -270,13 +268,13 @@ const Profile = () => {
 
   return (
     <div className="profile">
+      {message && (
+        <div className={`profile__message ${message.includes('успешно') ? 'profile__message--success' : 'profile__message--error'}`}>
+          {message}
+        </div>
+      )}
+      
       <div className="profile__container">
-        {message && (
-          <div className={`profile__message ${message.includes('успешно') ? 'profile__message--success' : 'profile__message--error'}`}>
-            {message}
-          </div>
-        )}
-
         <form className="profile__form" onSubmit={handleSubmit}>
           <div className="profile__section">
             <h2 className="profile__section-title">Основная информация</h2>

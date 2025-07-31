@@ -45,21 +45,12 @@ class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        print(f"DEBUG: LoginView.post вызван")
-        print(f"DEBUG: Данные входа: {request.data}")
-        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         
-        print(f"DEBUG: Пользователь найден: {user}")
-        
         # Входим в систему
         login(request, user)
-        
-        print(f"DEBUG: Пользователь вошел в систему")
-        print(f"DEBUG: Сессия: {request.session.session_key}")
-        print(f"DEBUG: Пользователь в сессии: {request.session.get('_auth_user_id')}")
         
         return Response({
             'user': UserSerializer(user).data,
@@ -192,12 +183,14 @@ class PasswordResetView(generics.GenericAPIView):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def check_auth(request):
     """Проверка аутентификации"""
     return Response({
-        'user': UserSerializer(request.user).data,
-        'is_authenticated': True
+        'user': UserSerializer(request.user).data if request.user.is_authenticated else None,
+        'is_authenticated': request.user.is_authenticated,
+        'session_id': request.session.session_key,
+        'user_id': request.session.get('_auth_user_id')
     })
 
 
@@ -262,9 +255,7 @@ def detect_location(request):
         lat = float(request.data.get('latitude'))
         lng = float(request.data.get('longitude'))
         
-        # Отладочная информация
-        print(f"DEBUG: Получены координаты lat={lat}, lng={lng}")
-        print(f"DEBUG: Все данные запроса: {request.data}")
+
         
         # Функции для извлечения адресов из разных API
         def extract_nominatim_address(data):
@@ -392,24 +383,19 @@ def detect_location(request):
                         real_address = api_config['extract'](data)
                         
                         if real_address and len(real_address) > 10:  # Проверяем что адрес достаточно детальный
-                            print(f"DEBUG: Получен детальный адрес: {real_address}")
                             break
                 except Exception as e:
-                    print(f"DEBUG: Ошибка API {api_config['url']}: {str(e)}")
                     continue
             
             # Если ни один API не сработал, используем координаты
             if not real_address or len(real_address) <= 10:
                 real_address = f"Координаты: {lat:.6f}, {lng:.6f}"
-                print(f"DEBUG: Используем координаты как fallback: {real_address}")
                 
         except Exception as e:
-            print(f"DEBUG: Ошибка при получении адреса: {str(e)}")
             real_address = f"Координаты: {lat:.6f}, {lng:.6f}"
         
         # Проверяем что координаты в пределах Узбекистана
         if not (37.0 <= lat <= 45.0 and 56.0 <= lng <= 73.0):
-            print(f"DEBUG: Координаты за пределами Узбекистана: lat={lat}, lng={lng}")
             return Response({
                 'success': False,
                 'message': 'Координаты находятся за пределами Узбекистана'
@@ -476,18 +462,11 @@ def detect_location(request):
             else:
                 region_name = "Ташкентская область"  # По умолчанию
         
-        print(f"DEBUG: Определен регион: {region_name}")
-        
         region = Region.objects.filter(name=region_name).first()
         
         if region:
             # Определяем только регион, остальные поля пользователь заполнит вручную
-            print(f"DEBUG: Определен регион: {region.name}")
-            
-            # Формируем сообщение
             message = f'Определен регион: {region.name}'
-            
-
             
             return Response({
                 'success': True,
@@ -495,13 +474,11 @@ def detect_location(request):
                 'message': message
             })
         else:
-            print(f"DEBUG: Регион не найден в базе данных: {region_name}")
             return Response({
                 'success': False,
                 'message': 'Регион не найден в базе данных'
             }, status=400)
     except Exception as e:
-        print(f"DEBUG: Ошибка: {str(e)}")
         return Response({
             'success': False,
             'message': f'Ошибка при определении местоположения: {str(e)}'
@@ -509,12 +486,16 @@ def detect_location(request):
 
 
 @api_view(['GET', 'PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def user_profile(request):
     """Профиль пользователя"""
-    print(f"DEBUG: user_profile вызван, метод: {request.method}")
-    print(f"DEBUG: Пользователь аутентифицирован: {request.user.is_authenticated}")
-    print(f"DEBUG: Пользователь: {request.user}")
+    if not request.user.is_authenticated:
+        return Response({
+            'error': 'Пользователь не аутентифицирован',
+            'is_authenticated': False,
+            'session_id': request.session.session_key,
+            'user_id': request.session.get('_auth_user_id')
+        }, status=401)
     
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     
@@ -522,14 +503,12 @@ def user_profile(request):
         return Response(UserProfileReadSerializer(profile).data)
     
     elif request.method == 'PUT':
-        print(f"DEBUG: ===== НАЧАЛО ОБРАБОТКИ PUT ЗАПРОСА =====")
-        print(f"DEBUG: Получены данные профиля: {request.data}")
-        print(f"DEBUG: Тип данных: {type(request.data)}")
-        print(f"DEBUG: Ключи: {list(request.data.keys())}")
-        print(f"DEBUG: Content-Type: {request.content_type}")
-        print(f"DEBUG: Пользователь: {request.user}")
-        print(f"DEBUG: Аутентифицирован: {request.user.is_authenticated}")
-        
+        if not request.user.is_authenticated:
+            return Response({
+                'error': 'Пользователь не аутентифицирован',
+                'is_authenticated': False
+            }, status=401)
+            
         # Обновляем данные пользователя
         user_data = {}
         if 'first_name' in request.data:
@@ -541,7 +520,6 @@ def user_profile(request):
             for field, value in user_data.items():
                 setattr(request.user, field, value)
             request.user.save()
-            print(f"DEBUG: Данные пользователя обновлены")
         
         # Обновляем данные профиля
         profile_data = {k: v for k, v in request.data.items() 
@@ -555,22 +533,13 @@ def user_profile(request):
         if 'district' in profile_data:
             profile_data['district_id'] = profile_data.pop('district')
         
-        print(f"DEBUG: Обработанные данные профиля: {profile_data}")
-        
         serializer = UserProfileSerializer(profile, data=profile_data, partial=True)
-        print(f"DEBUG: Сериализатор создан")
-        print(f"DEBUG: Данные для сериализатора: {profile_data}")
         
-        is_valid = serializer.is_valid()
-        print(f"DEBUG: Результат валидации: {is_valid}")
-        
-        if is_valid:
-            print(f"DEBUG: Данные валидны, сохраняем...")
+        if serializer.is_valid():
             serializer.save()
-            return Response(UserProfileReadSerializer(profile).data)
+            return Response({
+                'message': 'Профиль успешно обновлен!',
+                'data': UserProfileReadSerializer(profile).data
+            })
         else:
-            print(f"DEBUG: ===== ОШИБКИ ВАЛИДАЦИИ =====")
-            print(f"DEBUG: Ошибки валидации: {serializer.errors}")
-            print(f"DEBUG: Полные ошибки: {serializer.errors}")
-            print(f"DEBUG: Тип ошибок: {type(serializer.errors)}")
             return Response(serializer.errors, status=400) 
