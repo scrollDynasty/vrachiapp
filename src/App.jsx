@@ -34,7 +34,7 @@ function App() {
   // Серверная проверка сессии: истинный источник авторизации
   const validateAuth = async () => {
     try {
-      const resp = await fetch('https://healzy.uz/api/auth/check-auth/', { credentials: 'include' });
+      const resp = await fetch('https://vrachiapp-production.up.railway.app/api/auth/check-auth/', { credentials: 'include' });
       if (resp.ok) {
         const data = await resp.json();
         if (data.authenticated) {
@@ -82,7 +82,7 @@ function App() {
   // Инициализация CSRF cookie для SPA (нужно до любых POST/PUT/DELETE)
   useEffect(() => {
     try {
-      fetch('https://healzy.uz/api/auth/csrf/', {
+      fetch('https://vrachiapp-production.up.railway.app/api/auth/csrf/', {
         credentials: 'include'
       });
     } catch (_) {}
@@ -117,7 +117,7 @@ function App() {
         if (accessToken) {
           try {
             // Отправляем токен на сервер
-            const response = await fetch('https://healzy.uz/api/auth/google-auth/', {
+            const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/google-auth/', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ function App() {
         
         if (token) {
           try {
-            const response = await fetch(`https://healzy.uz/api/auth/verify-email/${token}/`, {
+            const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/verify-email/${token}/`, {
               method: 'GET',
               credentials: 'include'
             });
@@ -199,7 +199,7 @@ function App() {
 
   const updateUserData = async () => {
     try {
-      const response = await fetch('https://healzy.uz/api/auth/current-user/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/current-user/', {
         credentials: 'include'
       });
       
@@ -339,3 +339,6 @@ function App() {
 }
 
 export default App;
+
+
+

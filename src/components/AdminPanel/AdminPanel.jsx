@@ -53,7 +53,7 @@ const AdminPanel = ({ updateUserData }) => {
   
   const handleLogout = async () => {
     try {
-      await fetch('https://healzy.uz/api/auth/logout/', {
+      await fetch('https://vrachiapp-production.up.railway.app/api/auth/logout/', {
         method: 'POST',
         headers: { 'X-CSRFToken': (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')||[]).pop() || '' },
         credentials: 'include'
@@ -82,7 +82,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const checkUserPermissions = async () => {
     try {
-      const response = await fetch('https://healzy.uz/api/auth/current-user/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/current-user/', {
         credentials: 'include'
       });
       
@@ -112,8 +112,8 @@ const AdminPanel = ({ updateUserData }) => {
     setError(null);
     try {
       const url = activeTab === 'all' 
-        ? 'https://healzy.uz/api/auth/doctor-applications/list/'
-        : `https://healzy.uz/api/auth/doctor-applications/list/?status=${activeTab}`;
+        ? 'https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/list/'
+        : `https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/list/?status=${activeTab}`;
       
       const response = await fetch(url, {
         credentials: 'include'
@@ -138,7 +138,7 @@ const AdminPanel = ({ updateUserData }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://healzy.uz/api/auth/users/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/users/', {
         credentials: 'include'
       });
             
@@ -178,7 +178,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const loadRegions = async () => {
     try {
-      const response = await fetch('https://healzy.uz/api/auth/regions/');
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/regions/');
       if (response.ok) {
         const data = await response.json();
         setRegions(data);
@@ -190,7 +190,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const loadCities = async (regionId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/cities/?region_id=${regionId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/cities/?region_id=${regionId}`);
       if (response.ok) {
         const data = await response.json();
         setCities(data);
@@ -202,7 +202,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const loadDistricts = async (regionId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/districts/?region_id=${regionId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/districts/?region_id=${regionId}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -217,7 +217,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const loadDistrictsByCity = async (cityId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/districts/?city_id=${cityId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/districts/?city_id=${cityId}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -274,7 +274,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const openApplicationModal = async (application) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/doctor-applications/${application.id}/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/${application.id}/`, {
         credentials: 'include'
       });
       
@@ -291,7 +291,7 @@ const AdminPanel = ({ updateUserData }) => {
   const openUserModal = async (user) => {
     
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/users/${user.id}/profile/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/users/${user.id}/profile/`, {
         credentials: 'include'
       });
       
@@ -324,7 +324,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const handleApprove = async (applicationId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/doctor-applications/${applicationId}/update/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/${applicationId}/update/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ const AdminPanel = ({ updateUserData }) => {
     if (!reason) return;
     
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/doctor-applications/${applicationId}/update/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/${applicationId}/update/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -385,7 +385,7 @@ const AdminPanel = ({ updateUserData }) => {
 
   const handleUpdateDoctorName = async (applicationId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/doctor-applications/${applicationId}/update-name/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/${applicationId}/update-name/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')||[]).pop() || '' },
         credentials: 'include'
@@ -473,7 +473,7 @@ const AdminPanel = ({ updateUserData }) => {
     try {
       
       
-      const response = await fetch(`https://healzy.uz/api/auth/users/${selectedUser.user.id}/profile/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/users/${selectedUser.user.id}/profile/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -514,7 +514,7 @@ const AdminPanel = ({ updateUserData }) => {
     if (!confirmed) return;
     
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/users/${selectedUser.user.id}/delete/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/users/${selectedUser.user.id}/delete/`, {
         method: 'DELETE',
         headers: { 'X-CSRFToken': (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')||[]).pop() || '' },
         credentials: 'include'
@@ -794,7 +794,7 @@ const AdminPanel = ({ updateUserData }) => {
                     <div className="admin-panel__document">
                       <h4>Фотография</h4>
                           <img
-                            src={`https://healzy.uz/api/auth/protected-media/${selectedApplication.photo.replace(/^\/media\//, '')}`}
+                            src={`https://vrachiapp-production.up.railway.app/api/auth/protected-media/${selectedApplication.photo.replace(/^\/media\//, '')}`}
                             alt="Фото врача"
                             className="admin-panel__document-image"
                           />
@@ -805,7 +805,7 @@ const AdminPanel = ({ updateUserData }) => {
                     <div className="admin-panel__document">
                       <h4>Диплом</h4>
                       <a 
-                             href={`https://healzy.uz/api/auth/protected-media/${selectedApplication.diploma.replace(/^\/media\//, '')}`}
+                             href={`https://vrachiapp-production.up.railway.app/api/auth/protected-media/${selectedApplication.diploma.replace(/^\/media\//, '')}`}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="admin-panel__document-link"
@@ -819,7 +819,7 @@ const AdminPanel = ({ updateUserData }) => {
                     <div className="admin-panel__document">
                       <h4>Лицензия</h4>
                       <a 
-                             href={`https://healzy.uz/api/auth/protected-media/${selectedApplication.license.replace(/^\/media\//, '')}`}
+                             href={`https://vrachiapp-production.up.railway.app/api/auth/protected-media/${selectedApplication.license.replace(/^\/media\//, '')}`}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="admin-panel__document-link"
@@ -1172,3 +1172,5 @@ const AdminPanel = ({ updateUserData }) => {
 };
 
 export default AdminPanel; 
+
+

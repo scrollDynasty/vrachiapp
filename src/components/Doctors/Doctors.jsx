@@ -109,7 +109,7 @@ const Doctors = () => {
     // Получаем данные пользователя
     const fetchUserData = async () => {
       try {
-        const response = await fetch('https://healzy.uz/api/auth/current-user/', {
+        const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/current-user/', {
           credentials: 'include'
         });
         if (response.ok) {
@@ -169,7 +169,7 @@ const Doctors = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://healzy.uz/api/auth/doctors/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/doctors/', {
         credentials: 'include'
       });
       
@@ -506,3 +506,5 @@ const Doctors = () => {
 };
 
 export default Doctors; 
+
+

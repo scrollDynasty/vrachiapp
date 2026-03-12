@@ -121,7 +121,7 @@ const DoctorApplication = () => {
 
   const loadRegions = async () => {
     try {
-      const response = await fetch('https://healzy.uz/api/auth/regions/');
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/regions/');
       if (response.ok) {
         const data = await response.json();
         setRegions(data);
@@ -132,7 +132,7 @@ const DoctorApplication = () => {
 
   const loadCities = async (regionId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/cities/?region_id=${regionId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/cities/?region_id=${regionId}`);
       if (response.ok) {
         const data = await response.json();
         setCities(data);
@@ -143,7 +143,7 @@ const DoctorApplication = () => {
 
   const loadDistricts = async (regionId) => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/districts/?region_id=${regionId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/districts/?region_id=${regionId}`);
       if (response.ok) {
         const data = await response.json();
         setDistricts(data);
@@ -155,7 +155,7 @@ const DoctorApplication = () => {
   const loadDistrictsByCity = async (cityId) => {
     try {
       // Сначала пытаемся найти районы конкретного города
-      const response = await fetch(`https://healzy.uz/api/auth/districts/?city_id=${cityId}`);
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/districts/?city_id=${cityId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.length > 0) {
@@ -278,7 +278,7 @@ const DoctorApplication = () => {
 
 
       const csrfToken = (document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')||[]).pop() || '';
-      const response = await fetch('https://healzy.uz/api/auth/doctor-applications/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/doctor-applications/', {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrfToken
@@ -739,3 +739,5 @@ const DoctorApplication = () => {
 };
 
 export default DoctorApplication; 
+
+

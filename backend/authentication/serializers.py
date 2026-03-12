@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import User, UserProfile, Region, City, District, DoctorApplication, Consultation, Message
+from .models import (
+    User, UserProfile, Region, MedCity, MedDistrict,
+    DoctorApplication, Consultation, Message,
+    MedCity, MedDistrict, MedicalFacility, FacilityReview,
+)
 import json
 from django.utils import timezone
 
@@ -28,7 +32,7 @@ class CitySerializer(serializers.ModelSerializer):
     region = RegionSerializer(read_only=True)
     
     class Meta:
-        model = City
+        model = MedCity
         fields = ['id', 'name', 'name_uz', 'region']
 
 
@@ -38,7 +42,7 @@ class DistrictSerializer(serializers.ModelSerializer):
     city = CitySerializer(read_only=True)
     
     class Meta:
-        model = District
+        model = MedDistrict
         fields = ['id', 'name', 'name_uz', 'region', 'city']
 
 
@@ -281,14 +285,14 @@ class DoctorApplicationCreateSerializer(serializers.ModelSerializer):
         
         if city_id:
             try:
-                application.city = City.objects.get(id=city_id)
-            except City.DoesNotExist:
+                application.city = MedCity.objects.get(id=city_id)
+            except MedCity.DoesNotExist:
                 pass
         
         if district_id:
             try:
-                application.district = District.objects.get(id=district_id)
-            except District.DoesNotExist:
+                application.district = MedDistrict.objects.get(id=district_id)
+            except MedDistrict.DoesNotExist:
                 pass
         
         application.save()
@@ -414,3 +418,94 @@ class ConsultationUpdateSerializer(serializers.ModelSerializer):
                 attrs['completed_at'] = timezone.now()
         
         return attrs 
+
+class MedCitySerializer(serializers.ModelSerializer):
+    region_name = serializers.CharField(source='region.name', read_only=True)
+
+    class Meta:
+        model = MedCity
+        fields = ('id', 'name', 'region', 'region_name')
+
+
+class MedDistrictSerializer(serializers.ModelSerializer):
+    city_name = serializers.CharField(source='city.name', read_only=True)
+
+    class Meta:
+        model = MedDistrict
+        fields = ('id', 'name', 'city', 'city_name')
+
+
+class FacilityListSerializer(serializers.ModelSerializer):
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    district_name = serializers.CharField(source='district.name', read_only=True)
+    region_name = serializers.CharField(source='city.region.name', read_only=True)
+    facility_type_display = serializers.CharField(source='get_facility_type_display', read_only=True)
+
+    class Meta:
+        model = MedicalFacility
+        fields = (
+            'id', 'name', 'name_ru', 'facility_type', 'facility_type_display',
+            'ownership_type', 'city', 'city_name', 'district', 'district_name',
+            'region_name', 'address', 'phone', 'website', 'working_hours',
+            'is_24_hours', 'avg_rating', 'total_reviews', 'total_views',
+            'is_verified', 'is_featured', 'specializations', 'has_ambulance',
+            'has_pharmacy', 'has_lab', 'accepts_insurance', 'latitude', 'longitude',
+        )
+
+
+class FacilityDetailSerializer(serializers.ModelSerializer):
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    district_name = serializers.CharField(source='district.name', read_only=True)
+    region_name = serializers.CharField(source='city.region.name', read_only=True)
+    facility_type_display = serializers.CharField(source='get_facility_type_display', read_only=True)
+    photos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MedicalFacility
+        fields = '__all__'
+
+    def get_photos(self, obj):
+        photos = obj.photos.filter(is_approved=True)
+        return [{'id': p.id, 'photo': p.photo.url if p.photo else None, 'caption': p.caption} for p in photos]
+
+
+class FacilityReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    user_avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FacilityReview
+        fields = (
+            'id', 'facility', 'user', 'user_name', 'user_avatar',
+            'rating', 'title', 'comment',
+            'rating_service', 'rating_cleanliness',
+            'rating_equipment', 'rating_price',
+            'helpful_count', 'created_at',
+        )
+        read_only_fields = ('user', 'helpful_count', 'created_at')
+
+    def get_user_name(self, obj):
+        return obj.user.get_full_name() or obj.user.email
+
+    def get_user_avatar(self, obj):
+        try:
+            profile = obj.user.userprofile
+            return profile.avatar.url if profile.avatar else None
+        except Exception:
+            return None
+
+    def validate_rating(self, value):
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError('Rating must be between 1 and 5.')
+        return value
+
+    def validate(self, data):
+        request = self.context.get('request')
+        if request and FacilityReview.objects.filter(
+            user=request.user,
+            facility=data['facility']
+        ).exists():
+            raise serializers.ValidationError(
+                'You have already reviewed this facility.'
+            )
+        return data

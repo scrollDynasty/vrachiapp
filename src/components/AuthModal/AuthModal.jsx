@@ -32,7 +32,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isDarkTheme }) => {
     setError('');
 
     try {
-      const response = await fetch('https://healzy.uz/api/auth/resend-verification/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/resend-verification/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isDarkTheme }) => {
 
     try {
       const endpoint = isLogin ? '/api/auth/login/' : '/api/auth/register/';
-      const response = await fetch(`https://healzy.uz${endpoint}`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isDarkTheme }) => {
 
   const handleGoogleAuth = async () => {
     setError('');
-    // Динамический redirect_uri = текущий origin (добавьте оба варианта в Google Console: https://healzy.uz и https://www.healzy.uz)
+    // Динамический redirect_uri = текущий origin (добавьте оба варианта в Google Console: https://vrachiapp-production.up.railway.app и https://www.healzy.uz)
     const redirectUri = window.location.origin.replace(/\/$/, '');
     const params = new URLSearchParams({
       client_id: '735617581412-e8ceb269bj7qqrv9sl066q63g5dr5sne.apps.googleusercontent.com',
@@ -335,3 +335,5 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, isDarkTheme }) => {
 };
 
 export default AuthModal; 
+
+

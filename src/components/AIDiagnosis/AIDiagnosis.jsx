@@ -127,7 +127,7 @@ const AIDiagnosis = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://healzy.uz/api/auth/ai/diagnosis/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/ai/diagnosis/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -310,7 +310,7 @@ const AIDiagnosis = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://healzy.uz/api/auth/ai/diagnosis/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/ai/diagnosis/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -387,7 +387,7 @@ const AIDiagnosis = () => {
       formData.append('file', file);
       formData.append('type', isImage ? 'image' : 'video');
 
-      const response = await fetch('https://healzy.uz/api/auth/ai/diagnosis/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/ai/diagnosis/', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -477,7 +477,7 @@ const AIDiagnosis = () => {
       formData.append('file', audioBlob, 'voice.wav');
       formData.append('type', 'audio');
 
-      const response = await fetch('https://healzy.uz/api/auth/ai/diagnosis/', {
+      const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/ai/diagnosis/', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -705,3 +705,6 @@ const AIDiagnosis = () => {
 };
 
 export default AIDiagnosis;
+
+
+

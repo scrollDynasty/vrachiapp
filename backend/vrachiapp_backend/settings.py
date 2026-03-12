@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,43 +27,45 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '296411a6e1177b3d3d96dc074cd15b83817c00cc8c6c2ab889069c7cbc45b753')
 
 # TTS API Key для качественного женского голоса ElevenLabs
-ELEVENLABS_API_KEY = 'sk_496981d7be389ba63dc39097302ffe0c712406ea91d026a3'
+ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY', 'sk_496981d7be389ba63dc39097302ffe0c712406ea91d026a3')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'healzy.uz', 'www.healzy.uz', '172.174.231.5']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'healzy.uz', 'www.healzy.uz', '.railway.app', '.up.railway.app']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'channels',
-    'authentication',
+    "channels",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "authentication",
+    "drf_spectacular",
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'authentication.middleware.DisableCSRFMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 # Channels configuration
-ASGI_APPLICATION = 'vrachiapp_backend.asgi.application'
+ASGI_APPLICATION = "vrachiapp_backend.asgi.application"
 
 # Channel layers for WebSocket support (prod: Redis, fallback: InMemory)
 CHANNEL_LAYER_BACKEND = os.getenv('CHANNEL_LAYER', 'memory').lower()
@@ -209,6 +214,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -234,16 +240,22 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
+    "null",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://healzy.uz",
     "https://www.healzy.uz",
+    "https://intelligent-quietude-production-db15.up.railway.app",
+    "https://intelligent-quietude-production-db15.up.railway.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -259,8 +271,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Google OAuth settings
-GOOGLE_CLIENT_ID = '735617581412-e8ceb269bj7qqrv9sl066q63g5dr5sne.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = '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'
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '735617581412-e8ceb269bj7qqrv9sl066q63g5dr5sne.apps.googleusercontent.com')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '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')
 
 
 # Email settings для Gmail SMTP
@@ -275,23 +287,23 @@ DEFAULT_FROM_EMAIL = EMAIL_FROM
 
 # Session settings (30 дней, скользящая сессия)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True # В продакшене лучше True, но для локальной разработки False  
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'
 # Если используете субдомены — раскомментируйте:
 # SESSION_COOKIE_DOMAIN = '.healzy.uz'
 SESSION_SAVE_EVERY_REQUEST = True
 
 # CSRF tightening (SPA должен слать X-CSRFToken)
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True # В продакшене лучше True, но для локальной разработки False
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'None'
 # Делаем CSRF cookie долгоживущей, чтобы не терять её на мобильном
 CSRF_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
 
 # Security hardening
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False  # В продакшене лучше True, но для локальной разработки False
 SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
@@ -304,8 +316,8 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 # TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 # TELEGRAM_SUPPORT_CHAT_ID = os.getenv('TELEGRAM_SUPPORT_CHAT_ID', '')
 # Для текущего запуска используем значения, предоставленные вами:
-TELEGRAM_BOT_TOKEN = '8120853924:AAE8QVugXnKY3Ax_uiDDWE9OP1wjlQHztMQ'
-TELEGRAM_SUPPORT_CHAT_ID = '-1002756008326'
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8120853924:AAE8QVugXnKY3Ax_uiDDWE9OP1wjlQHztMQ')
+TELEGRAM_SUPPORT_CHAT_ID = os.getenv('TELEGRAM_SUPPORT_CHAT_ID', '-1002756008326')
 
 # DRF throttling (защита от брутфорса/флуда)
 REST_FRAMEWORK.update({
@@ -318,3 +330,66 @@ REST_FRAMEWORK.update({
         'user': os.getenv('DRF_THROTTLE_USER', '1000/min'),
     }
 })
+
+# Cache configuration (Redis in production, local memory in development)
+CACHE_BACKEND = os.getenv('CACHE_BACKEND', 'memory').lower()
+
+if CACHE_BACKEND == 'redis':
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+                'IGNORE_EXCEPTIONS': True,
+            },
+            'KEY_PREFIX': 'healzy',
+            'TIMEOUT': 300,  # 5 minutes default
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'healzy-cache',
+        }
+    }
+
+# Cache timeouts
+CACHE_TTL_SHORT = 60        # 1 minute
+CACHE_TTL_MEDIUM = 300      # 5 minutes
+CACHE_TTL_LONG = 3600       # 1 hour
+CACHE_TTL_DAY = 86400       # 24 hours
+
+
+# Twilio SMS Settings
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='')
+SMS_ENABLED = config('SMS_ENABLED', default='False') == 'True'
+
+# API Documentation
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Healzy API',
+    'DESCRIPTION': 'Medical platform API for online doctor consultations, appointments, medical records and more.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+}
+
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000'
+                        "https://intelligent-quietude-production-db15.up.railway.app",]
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tashkent'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+

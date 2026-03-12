@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, UserProfile, Region, City, District, DoctorApplication, Consultation, Message, AIDialogue, AIMessage
+from .models import (
+    User, UserProfile, Region,
+    DoctorApplication, Consultation, Message,
+    AIDialogue, AIMessage,
+    MedCity, MedDistrict,
+    MedicalFacility, FacilityReview, FacilityPhoto,
+)
 
 
 @admin.register(User)
@@ -38,20 +44,18 @@ class RegionAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
-@admin.register(City)
-class CityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'region']
-    list_filter = ['region']
-    search_fields = ['name', 'region__name']
-    raw_id_fields = ['region']
+@admin.register(MedCity)
+class MedCityAdmin(admin.ModelAdmin):
+    list_display = ("name", "region")
+    search_fields = ("name",)
+    list_filter = ("region",)
 
 
-@admin.register(District)
-class DistrictAdmin(admin.ModelAdmin):
-    list_display = ['name', 'region', 'city']
-    list_filter = ['region', 'city']
-    search_fields = ['name', 'region__name', 'city__name']
-    raw_id_fields = ['region', 'city']
+@admin.register(MedDistrict)
+class MedDistrictAdmin(admin.ModelAdmin):
+    list_display = ("name", "city", "region")
+    search_fields = ("name",)
+    list_filter = ("region", "city")
 
 
 @admin.register(DoctorApplication)
@@ -103,3 +107,27 @@ class AIMessageAdmin(admin.ModelAdmin):
     def content_preview(self, obj):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     content_preview.short_description = 'Содержание' 
+
+@admin.register(MedicalFacility)
+class MedicalFacilityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'facility_type', 'ownership_type', 'city', 'avg_rating', 'total_reviews', 'is_verified', 'is_active', 'is_featured')
+    list_filter = ('facility_type', 'ownership_type', 'city__region', 'city', 'is_verified', 'is_active', 'is_featured', 'is_24_hours')
+    search_fields = ('name', 'name_ru', 'address', 'phone')
+    readonly_fields = ('avg_rating', 'total_reviews', 'total_views', 'created_at', 'updated_at')
+    list_editable = ('is_verified', 'is_active', 'is_featured')
+    raw_id_fields = ('city', 'district', 'added_by')
+
+
+@admin.register(FacilityReview)
+class FacilityReviewAdmin(admin.ModelAdmin):
+    list_display = ('facility', 'user', 'rating', 'created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('facility__name', 'user__email')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(FacilityPhoto)
+class FacilityPhotoAdmin(admin.ModelAdmin):
+    list_display = ('facility', 'uploaded_by', 'is_approved', 'created_at')
+    list_filter = ('is_approved',)
+    list_editable = ('is_approved',)

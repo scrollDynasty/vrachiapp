@@ -53,7 +53,7 @@ const Chat = () => {
 
   const fetchConsultation = async () => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/consultations/${consultationId}/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/consultations/${consultationId}/`, {
         credentials: 'include'
       });
 
@@ -70,7 +70,7 @@ const Chat = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/consultations/${consultationId}/messages/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/consultations/${consultationId}/messages/`, {
         credentials: 'include'
       });
 
@@ -245,7 +245,7 @@ const Chat = () => {
   const handleAcceptConsultation = async () => {
     setActionLoading(true);
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/consultations/${consultationId}/accept/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/consultations/${consultationId}/accept/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +274,7 @@ const Chat = () => {
   const handleCompleteConsultation = async () => {
     setActionLoading(true);
     try {
-      const response = await fetch(`https://healzy.uz/api/auth/consultations/${consultationId}/complete/`, {
+      const response = await fetch(`https://vrachiapp-production.up.railway.app/api/auth/consultations/${consultationId}/complete/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -694,3 +694,5 @@ const Chat = () => {
 };
 
 export default Chat; 
+
+

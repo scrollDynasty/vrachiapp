@@ -20,7 +20,7 @@ const Header = ({ isAuthenticated, userData, onLogout, onAuthSuccess, isDarkThem
     const fetchCurrentUser = async () => {
       if (isAuthenticated) {
         try {
-          const response = await fetch('https://healzy.uz/api/auth/current-user/', {
+          const response = await fetch('https://vrachiapp-production.up.railway.app/api/auth/current-user/', {
             credentials: 'include'
           });
           if (response.ok) {
@@ -190,3 +190,5 @@ const Header = ({ isAuthenticated, userData, onLogout, onAuthSuccess, isDarkThem
 };
 
 export default Header; 
+
+
